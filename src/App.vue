@@ -136,7 +136,7 @@
             </button>
             <button
               class="button is-link is-light"
-              @click="getusers()"
+              v-on:click.prevent="getUsers"
             >
                مشاهده اطلاعات
             </button>
@@ -148,10 +148,12 @@
   <ul>
     <li
       v-for="user in users"
-      :key="user.index"
+      :key="user.users"
     >
       | {{ user.username }}
       | {{ user.password }}
+      | {{ user.mobilePhone }}
+      | {{ user.nationalID }}
     </li>
   </ul>
 </div>
@@ -168,7 +170,7 @@ export default {
       phone: null,
       nationalCode: null,
       input: null,
-      users: '',
+      users: null,
     };
   },
   methods: {
@@ -182,13 +184,17 @@ export default {
         .then((response) => {
           if (response.status === 200) {
             // console.log(requestOptions);
-            this.cleardata();
+            // this.cleardata();
           }
         });
     },
 
     getUsers() {
-      fetch('http://127.0.0.1:9000/user/list')
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      fetch('http://127.0.0.1:9000/user/list', requestOptions)
         .then((data) => {
           this.users = data;
         });
@@ -248,12 +254,13 @@ export default {
       e.preventDefault();
     },
     // delete data form
-    cleardata() {
+    cleardata(err) {
       this.name = null;
       this.confirmPwd = null;
       this.pwd = null;
       this.phone = null;
       this.nationalCode = null;
+      err.preventDefault();
     },
     // cheak input
     checkUserInput(event) {
@@ -309,7 +316,7 @@ export default {
     },
 
     validPassword(pwd) {
-      const pass = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+      const pass = /^(?=.*\d)(?=.*[a-z]).{8,20}$/;
       // console.log(pass.test(pwd));
       return pass.test(pwd);
     },
